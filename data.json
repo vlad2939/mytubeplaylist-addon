@@ -1,0 +1,154 @@
+{
+  "playlists": [
+    {
+      "title": "Spațiu & Astronomie",
+      "videos": [
+        { "title": "Călătorie prin Sistemul Solar - Partea 1", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "13:21" },
+        { "title": "Ce se află într-o gaură neagră?", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "8:31" },
+        { "title": "Istoria Universului pe scurt", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "14:32" },
+        { "title": "Misterele planetei Marte", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "6:12" },
+        { "title": "Cum s-a format Luna?", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "8:58" },
+        { "title": "Telescopul James Webb - Primele Imagini", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "6:19" },
+        { "title": "Suntem singuri în Univers?", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "11:50" },
+        { "title": "Cum arată marginea spațiului?", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "7:21" },
+        { "title": "Fizica Spațială Explicată", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "16:36" },
+        { "title": "Teoria Relativității (Einstein)", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "15:32" }
+      ]
+    },
+    {
+      "title": "IT, Programare & Tech",
+      "videos": [
+        { "title": "Introducere în Javascript Modern", "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", "duration": "6:24" },
+        { "title": "Cum funcționează Inteligența Artificială", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "duration": "9:40" },
+        { "title": "Ce este un API și cum îl folosești", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "6:50" },
+        { "title": "Baze de Date Relationale vs NoSQL", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "14:37" },
+        { "title": "Tailwind CSS - Ghid Complet", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "5:20" },
+        { "title": "Cum se construiește un server Node.js", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "12:37" },
+        { "title": "Docker explicat în 10 minute", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "4:54" },
+        { "title": "Cum gândește un Software Engineer", "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", "duration": "2:19" },
+        { "title": "Securitate Cibernetică de bază", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "duration": "15:16" },
+        { "title": "Viitorul Web-ului - Web 3.0", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "2:49" }
+      ]
+    },
+    {
+      "title": "Lofi, Jazz & Concentrare",
+      "videos": [
+        { "title": "Lofi hip hop radio - beats to relax/study to", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "11:16" },
+        { "title": "Jazz ambiental pentru seară lungă", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "10:38" },
+        { "title": "Pian și ploaie - Focus 100%", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "2:57" },
+        { "title": "Synthwave Radio for Hacking", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "14:36" },
+        { "title": "Cafenea Acustică Bossa Nova", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "5:45" },
+        { "title": "Ploaie de toamnă și pian (3 ore)", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "6:45" },
+        { "title": "Beats Instrumentale pentru citit", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "5:17" },
+        { "title": "Midnight Chill Lofi", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "3:53" },
+        { "title": "Deep Focus Music - Binaural Beats", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "12:11" },
+        { "title": "Chopin Playlist Relaxare", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "8:47" }
+      ]
+    },
+    {
+      "title": "Documentare & Natură",
+      "videos": [
+        { "title": "Planeta Pământ - Episodul 1", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "16:43" },
+        { "title": "Viața la Polul Nord", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "10:51" },
+        { "title": "Junglele neexplorate ale planetei", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "14:19" },
+        { "title": "Oceanele adânci", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "7:17" },
+        { "title": "Cum salvează pădurile clima lumii", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "16:57" },
+        { "title": "Supervulcanul Yellowstone", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "3:49" },
+        { "title": "Migrația marilor turme din Africa", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "12:22" },
+        { "title": "Micro-organisme care schimbă viitorul", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "8:56" },
+        { "title": "Dezastre naturale", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "13:17" },
+        { "title": "Minunile lumii naturale (BBC)", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "13:58" }
+      ]
+    },
+    {
+      "title": "Review-uri Auto & Moto",
+      "videos": [
+        { "title": "Test Drive Tesla Model S Plaid", "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", "duration": "16:59" },
+        { "title": "Mașini Electrice vs Benzilă - Adevarul", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "duration": "4:18" },
+        { "title": "Porsche 911 GT3 RS pe Nurburgring", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "11:41" },
+        { "title": "Restaurare BMW clasic E30", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "14:31" },
+        { "title": "Cele mai fiabile motoare japoneze", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "10:20" },
+        { "title": "Cât costă să întreții un Supercar?", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "2:13" },
+        { "title": "Review Dacia Duster 2025", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "11:42" },
+        { "title": "Tehnologia Autopilot explicată", "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", "duration": "7:56" },
+        { "title": "Curse ilegale in istorie", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "duration": "6:14" },
+        { "title": "Cum să cumperi o mașină second-hand", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "15:52" }
+      ]
+    },
+    {
+      "title": "Gătit & Gastronomie",
+      "videos": [
+        { "title": "Rețetă autentică de Pizza Napoletană", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "7:12" },
+        { "title": "Cum gătești friptura perfectă (Steak)", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "7:27" },
+        { "title": "Sosuri de bază franțuzești", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "16:49" },
+        { "title": "Secretul unui Sushi de calitate", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "7:48" },
+        { "title": "Cum am făcut pâine cu maia acasă", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "16:51" },
+        { "title": "Totul despre condimente asiatice", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "11:36" },
+        { "title": "Rețete rapide sub 15 minute", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "2:26" },
+        { "title": "Masterclass Gordon Ramsay", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "12:33" },
+        { "title": "Deserturi vegane de efect", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "9:36" },
+        { "title": "Degustare de brânzeturi italiene", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "9:20" }
+      ]
+    },
+    {
+      "title": "Sport & Fitness",
+      "videos": [
+        { "title": "Antrenament acasă - Fără greutăți", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "7:53" },
+        { "title": "Nutriție pentru creștere musculară", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "7:26" },
+        { "title": "Sesiune Yoga de 20 minute dimineața", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "7:59" },
+        { "title": "Corectarea posturii la birou", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "13:53" },
+        { "title": "Exerciții pentru durerile de spate", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "13:41" },
+        { "title": "Alergare Corectă - Tehnică", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "3:39" },
+        { "title": "De ce este Somnul cel mai bun supliment", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "12:31" },
+        { "title": "Recuperare și stretching", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "12:36" },
+        { "title": "Mituri despre arderea grăsimilor", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "9:12" },
+        { "title": "Vlog de antrenament", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "14:37" }
+      ]
+    },
+    {
+      "title": "Psihologie & Personal Development",
+      "videos": [
+        { "title": "Cum să oprești procrastinarea", "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", "duration": "10:16" },
+        { "title": "Sistemul Dopaminei din Creier", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "duration": "15:28" },
+        { "title": "Zilnic 1% mai bun - James Clear", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "16:16" },
+        { "title": "Stoicismul pentru viața modernă", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "6:56" },
+        { "title": "Scrie un jurnal eficient", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "16:37" },
+        { "title": "Regula de 5 secunde - Mel Robbins", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "16:38" },
+        { "title": "Controlul Stresului", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "12:54" },
+        { "title": "Efectul Dunning-Kruger pe scurt", "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", "duration": "2:51" },
+        { "title": "Deep Work - Concentrare la maxim", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "duration": "16:52" },
+        { "title": "Inteligența Emoțională Dezbătută", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "15:42" }
+      ]
+    },
+    {
+      "title": "Muzică Rock & Classic",
+      "videos": [
+        { "title": "Solo-uri legendare din Rock", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "13:19" },
+        { "title": "Istoria formației Queen", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "14:37" },
+        { "title": "Cum se înregistrează un album vinil?", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "9:29" },
+        { "title": "Beethoven - Cele mai bune compoziții", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "15:14" },
+        { "title": "De ce sună așa bine anii '80?", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "7:20" },
+        { "title": "Evoluția Chitarei Electrice", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "15:33" },
+        { "title": "Concert Classic Rock Live 4K", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "15:43" },
+        { "title": "Mozart vs Salieri", "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "duration": "15:32" },
+        { "title": "Cele mai cunoscute riff-uri de chitară", "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk", "duration": "14:37" },
+        { "title": "Cum se orchestrează un film?", "url": "https://www.youtube.com/watch?v=mIYzpCGuIjc", "duration": "3:19" }
+      ]
+    },
+    {
+      "title": "Podcasturi Extra-Lungi",
+      "videos": [
+        { "title": "Podcast #01 - Despre Originile Universului (3 Ore)", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "10:28" },
+        { "title": "Podcast #02 - Inteligența Artificială în 2025", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "8:59" },
+        { "title": "Podcast Episod Special: Medicină și Biochacking", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "3:30" },
+        { "title": "Conversații: Viitorul Transportului Electric", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "6:47" },
+        { "title": "Istorie Podcast: Căderea Imperiului Roman", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "7:48" },
+        { "title": "Podcast Financiar: Investitii în Piețe Bear", "url": "https://www.youtube.com/watch?v=p7bobijCE4w", "duration": "3:10" },
+        { "title": "Dezbatere: Etica în Robotică Autonomă", "url": "https://www.youtube.com/watch?v=aircAruvnKk", "duration": "7:30" },
+        { "title": "Interviu Exclusiv cu Ingineri de la NASA", "url": "https://www.youtube.com/watch?v=libKVRa01L8", "duration": "15:58" },
+        { "title": "Podcast despre Productivitate în lucrul Remote", "url": "https://www.youtube.com/watch?v=R9K4_gI6Zc8", "duration": "6:50" },
+        { "title": "Povești Antreprenoriale de Succes - 4 Ore Editie", "url": "https://www.youtube.com/watch?v=fENyEI0oQaw", "duration": "12:22" }
+      ]
+    }
+  ]
+}

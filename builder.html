@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Builder — YT Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Material+Icons+Round&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          animation: {
+            'blob':      'blob 10s infinite alternate',
+            'slide-up':  'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-slow':'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 1.4s linear infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%':   { transform: 'translate(0px, 0px) scale(1)' },
+              '33%':  { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%':  { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            slideUp: {
+              '0%':   { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { -webkit-font-smoothing: antialiased; font-family: 'Outfit', sans-serif; }
+
+    /* Scrollbar — identic cu dashboard */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(249,115,22,0.50); }
+
+    input, select { color-scheme: dark; }
+
+    /* Input focus ring */
+    .input-field:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.20);
+      border-color: rgba(249,115,22,0.50);
+    }
+
+    /* Progress bar shimmer */
+    .progress-bar {
+      transition: width 0.3s ease;
+      background: linear-gradient(90deg, #f97316, #fb923c, #f97316);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s linear infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Playlist card entrance */
+    .pl-card {
+      animation: fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Video row */
+    .video-row { transition: background 0.15s ease; }
+    .video-row:hover { background: rgba(249,115,22,0.06); }
+
+    /* JSON preview */
+    #jsonPreview {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    /* Toast */
+    #toast {
+      transition: all 0.3s cubic-bezier(.16,1,.3,1);
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Collapsible video list */
+    .video-list { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .video-list.open { max-height: 9999px; }
+    .chevron { transition: transform 0.25s ease; }
+    .chevron.open { transform: rotate(180deg); }
+  </style>
+</head>
+
+<!-- bg-[#0a0604] — identic cu dark mode al dashboard-ului -->
+<body class="bg-[#0a0604] text-zinc-100 min-h-screen overflow-x-hidden antialiased relative
+             selection:bg-orange-500/30 selection:text-white">
+
+  <!-- BLOBS — identici cu dashboard (yellow/amber/orange dark) -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full
+                bg-yellow-500/20 blur-[100px] animate-blob
+                mix-blend-screen transition-colors duration-1000"></div>
+    <div class="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full
+                bg-amber-500/20 blur-[120px] animate-blob
+                mix-blend-screen transition-colors duration-1000"
+         style="animation-delay:2s"></div>
+    <div class="absolute bottom-[-20%] left-[10%] w-[40%] h-[40%] rounded-full
+                bg-orange-500/15 blur-[100px] animate-blob
+                mix-blend-screen transition-colors duration-1000"
+         style="animation-delay:4s"></div>
+  </div>
+
+  <!-- WRAPPER — p-4 lg:p-6 gap-6, identic cu dashboard -->
+  <div class="relative z-10 flex h-screen p-4 lg:p-6 gap-6 w-full max-w-[1800px] mx-auto overflow-hidden">
+
+    <!-- ══════════════════════════════════════════════
+         PANOU STÂNGA — inputs & controls
+         Glass panel identic cu sidebar-ul dashboard
+    ═══════════════════════════════════════════════ -->
+    <div class="w-[480px] flex-shrink-0 flex flex-col
+                bg-white/5 backdrop-blur-2xl
+                border border-white/10
+                rounded-3xl overflow-hidden
+                shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+
+      <!-- Header panou -->
+      <div class="h-20 flex items-center px-6
+                  border-b border-white/5 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <a href="index.html" title="Înapoi la Dashboard"
+             class="w-8 h-8 rounded-xl bg-white/5 border border-white/10
+                    flex items-center justify-center
+                    hover:bg-orange-900/30 hover:border-orange-700/50 hover:text-orange-400
+                    text-zinc-500 transition-all duration-200 group">
+            <span class="material-icons-round text-[16px]">arrow_back</span>
+          </a>
+          <div class="w-8 h-8 rounded-xl bg-zinc-900 border border-white/10
+                      flex items-center justify-center shadow-lg shadow-orange-500/20">
+            <span class="material-icons-round text-white text-[16px]">construction</span>
+          </div>
+          <div>
+            <p class="font-bold text-[18px] tracking-tight text-white leading-tight">JSON Builder</p>
+            <p class="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">YT Dashboard Tool</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable content -->
+      <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5
+                  [&::-webkit-scrollbar]:w-2
+                  [&::-webkit-scrollbar-thumb]:rounded-full
+                  [&::-webkit-scrollbar-thumb]:bg-white/10
+                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
+
+        <!-- Descriere -->
+        <p class="text-[13px] text-zinc-400 leading-relaxed">
+          Adaugă link-uri de playlist-uri YouTube și generează automat un fișier
+          <code class="bg-white/8 px-1.5 py-0.5 rounded text-orange-400 text-[11px]">data.json</code>
+          compatibil cu dashboard-ul.
+        </p>
+
+        <!-- API KEY -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+            YouTube Data API v3 Key
+          </label>
+          <div class="relative">
+            <span class="material-icons-round absolute left-4 top-1/2 -translate-y-[45%]
+                         text-zinc-600 text-[18px] pointer-events-none">vpn_key</span>
+            <input id="apiKeyInput" type="password"
+                   placeholder="AIza... — introdu API key-ul tău"
+                   class="input-field w-full
+                          bg-white/5 border border-white/10 rounded-2xl
+                          pl-11 pr-10 py-3.5
+                          text-zinc-100 placeholder-zinc-600
+                          text-[14px] transition-all duration-200" />
+            <button id="toggleApiKey"
+                    class="absolute right-3 top-1/2 -translate-y-1/2
+                           text-zinc-600 hover:text-zinc-400 transition-colors duration-150 p-1">
+              <span id="eyeIcon" class="material-icons-round text-[16px]">visibility_off</span>
+            </button>
+          </div>
+          <p class="mt-1.5 text-[11px] text-zinc-600 leading-relaxed">
+            Obții gratuit din
+            <a href="https://console.cloud.google.com/" target="_blank" rel="noopener"
+               class="text-orange-500/70 hover:text-orange-400 underline underline-offset-2">
+              Google Cloud Console
+            </a>
+            → APIs &amp; Services → Credentials → Create API Key →
+            activează <em>YouTube Data API v3</em>.
+          </p>
+        </div>
+
+        <!-- ADD PLAYLIST URL -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+            Link Playlist YouTube
+          </label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <span class="material-icons-round absolute left-4 top-1/2 -translate-y-[45%]
+                           text-zinc-600 text-[18px] pointer-events-none">link</span>
+              <input id="urlInput" type="url"
+                     placeholder="https://www.youtube.com/playlist?list=PL..."
+                     class="input-field w-full
+                            bg-white/5 border border-white/10 rounded-2xl
+                            pl-11 pr-3 py-3.5
+                            text-zinc-100 placeholder-zinc-600
+                            text-[14px] transition-all duration-200" />
+            </div>
+            <button id="addBtn"
+                    class="flex-shrink-0 flex items-center gap-1.5 px-5 py-3 rounded-2xl
+                           text-[14px] font-semibold
+                           bg-orange-500 hover:bg-orange-400
+                           text-white shadow-lg shadow-orange-500/25
+                           border border-orange-400/50
+                           transition-all duration-200 active:scale-95
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-orange-500">
+              <span class="material-icons-round text-[16px]">add</span>
+              Fetch
+            </button>
+          </div>
+          <p class="mt-1.5 text-[11px] text-zinc-600">
+            Funcționează cu orice playlist public sau neinlistat (nu privat).
+          </p>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div id="progressWrapper" class="hidden">
+          <div class="flex items-center justify-between mb-1.5">
+            <span id="progressLabel" class="text-[12px] text-zinc-400"></span>
+            <span id="progressCount" class="text-[11px] font-mono text-orange-400"></span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/5 overflow-hidden">
+            <div id="progressBar" class="progress-bar h-full rounded-full w-0"></div>
+          </div>
+        </div>
+
+        <!-- PLAYLIST QUEUE -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+              Playlist-uri încărcate
+            </label>
+            <span id="totalBadge"
+                  class="hidden text-[10px] font-mono
+                         bg-orange-500/15 text-orange-400
+                         border border-orange-500/20
+                         px-2 py-0.5 rounded-full"></span>
+          </div>
+
+          <!-- Empty state -->
+          <div id="emptyState"
+               class="flex flex-col items-center justify-center py-10 rounded-2xl
+                      border border-dashed border-white/8 text-center">
+            <span class="material-icons-round text-[36px] text-zinc-700 mb-2">playlist_add</span>
+            <p class="text-[13px] text-zinc-600">Niciun playlist adăugat încă.</p>
+            <p class="text-[11px] text-zinc-700 mt-0.5">Introdu un link mai sus și apasă Fetch.</p>
+          </div>
+
+          <!-- Playlist cards -->
+          <div id="playlistQueue" class="space-y-2"></div>
+        </div>
+
+      </div><!-- end scrollable -->
+
+      <!-- BOTTOM ACTION BAR -->
+      <div class="px-5 py-4 border-t border-white/5
+                  bg-black/20 backdrop-blur-md flex-shrink-0 space-y-2.5">
+
+        <!-- Custom filename -->
+        <div class="flex items-center gap-2.5">
+          <span class="material-icons-round text-[16px] text-zinc-600">edit_note</span>
+          <input id="filenameInput" type="text" value="data.json"
+                 class="input-field flex-1 px-3 py-2 rounded-xl text-[12px] font-mono
+                        bg-white/5 border border-white/10
+                        text-zinc-300 placeholder-zinc-600
+                        transition-all duration-200" />
+        </div>
+
+        <!-- Generate + Clear -->
+        <div class="flex gap-2">
+          <button id="generateBtn" disabled
+                  class="flex-1 flex items-center justify-center gap-2
+                         px-4 py-3 rounded-2xl text-[14px] font-semibold
+                         bg-orange-500 hover:bg-orange-400
+                         text-white shadow-lg shadow-orange-500/20
+                         border border-orange-400/50
+                         disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-orange-500
+                         transition-all duration-200 active:scale-[.98]">
+            <span class="material-icons-round text-[18px]">download</span>
+            Generează &amp; Descarcă JSON
+          </button>
+          <button id="clearBtn"
+                  class="w-12 flex items-center justify-center rounded-2xl
+                         bg-white/5 border border-white/10
+                         hover:bg-red-900/30 hover:border-red-800/50 hover:text-red-400
+                         text-zinc-600 transition-all duration-200 active:scale-95"
+                  title="Șterge tot">
+            <span class="material-icons-round text-[18px]">delete_outline</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         PANOU DREAPTA — JSON live preview
+         Glass panel identic cu main panel dashboard
+    ═══════════════════════════════════════════════ -->
+    <div class="flex-1 flex flex-col
+                bg-white/5 backdrop-blur-2xl
+                border border-white/10
+                rounded-3xl overflow-hidden
+                shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+
+      <!-- Preview header -->
+      <div class="h-20 flex items-center justify-between px-6
+                  border-b border-white/5 flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="material-icons-round text-orange-500 text-[20px]">data_object</span>
+          <h2 class="font-bold text-[18px] tracking-tight text-white">Preview JSON</h2>
+          <span id="previewBadge"
+                class="hidden text-[10px] font-mono
+                       bg-white/5 border border-white/10
+                       px-2 py-0.5 rounded-full text-zinc-500"></span>
+        </div>
+        <button id="copyJsonBtn"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-[13px] font-semibold
+                       bg-white/5 border border-white/10
+                       hover:bg-white/10 hover:border-orange-700/40 hover:text-orange-400
+                       text-zinc-500 transition-all duration-200 active:scale-95
+                       focus:outline-none focus:ring-2 focus:ring-orange-500/50">
+          <span class="material-icons-round text-[14px]">content_copy</span>
+          Copiază
+        </button>
+      </div>
+
+      <!-- JSON content -->
+      <div class="flex-1 overflow-auto p-6
+                  [&::-webkit-scrollbar]:w-2
+                  [&::-webkit-scrollbar-thumb]:rounded-full
+                  [&::-webkit-scrollbar-thumb]:bg-white/10
+                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
+        <pre id="jsonPreview" class="text-[11px] text-zinc-600 leading-relaxed whitespace-pre-wrap break-all">
+<span class="text-zinc-700">// JSON-ul generat va apărea aici.
+// Adaugă cel puțin un playlist și apasă "Fetch".</span>
+        </pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"
+       class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50
+              flex items-center gap-2.5 px-5 py-3 rounded-2xl
+              bg-zinc-900/95 border border-white/10
+              backdrop-blur-xl shadow-2xl shadow-black/40
+              text-[13px] font-semibold text-white
+              pointer-events-none min-w-[220px]">
+    <span id="toastIcon" class="material-icons-round text-[18px] text-orange-400">check_circle</span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script>
+  /* =====================================================
+     JSON BUILDER — app logic
+     Vanilla JS, YouTube Data API v3, zero dependencies
+  ===================================================== */
+
+  const DEFAULT_API_KEY = 'AIzaSyD-z_Ze2EOd72MXbP4mKYhaAKxc4wrn9gk';
+  const YT_API_BASE  = 'https://www.googleapis.com/youtube/v3';
+  const MAX_RESULTS  = 50;
+
+  /* ── STATE ─────────────────────────────────────── */
+  const playlists = [];
+
+  /* ── DOM REFS ──────────────────────────────────── */
+  const apiKeyInput     = document.getElementById('apiKeyInput');
+  const toggleApiKeyBtn = document.getElementById('toggleApiKey');
+  const eyeIcon         = document.getElementById('eyeIcon');
+  const urlInput        = document.getElementById('urlInput');
+  const addBtn          = document.getElementById('addBtn');
+  const playlistQueue   = document.getElementById('playlistQueue');
+  const emptyState      = document.getElementById('emptyState');
+  const generateBtn     = document.getElementById('generateBtn');
+  const clearBtn        = document.getElementById('clearBtn');
+  const filenameInput   = document.getElementById('filenameInput');
+  const jsonPreview     = document.getElementById('jsonPreview');
+  const copyJsonBtn     = document.getElementById('copyJsonBtn');
+  const totalBadge      = document.getElementById('totalBadge');
+  const previewBadge    = document.getElementById('previewBadge');
+  const progressWrapper = document.getElementById('progressWrapper');
+  const progressBar     = document.getElementById('progressBar');
+  const progressLabel   = document.getElementById('progressLabel');
+  const progressCount   = document.getElementById('progressCount');
+  const toast           = document.getElementById('toast');
+  const toastMsg        = document.getElementById('toastMsg');
+  const toastIcon       = document.getElementById('toastIcon');
+
+  if (DEFAULT_API_KEY && !DEFAULT_API_KEY.startsWith('INSEREAZĂ')) {
+    apiKeyInput.value = DEFAULT_API_KEY;
+  }
+
+  /* ── UTILITIES ─────────────────────────────────── */
+
+  function getApiKey() {
+    return apiKeyInput.value.trim() || DEFAULT_API_KEY;
+  }
+
+  function extractPlaylistId(url) {
+    try {
+      return new URL(url).searchParams.get('list');
+    } catch {
+      const m = url.match(/[?&]list=([^&#]+)/);
+      return m ? m[1] : null;
+    }
+  }
+
+  /**
+   * Convertește durata ISO 8601 (PT1H2M3S) → "H:MM:SS" sau "M:SS".
+   */
+  function iso8601ToDuration(iso) {
+    if (!iso) return '0:00';
+    const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!m) return '0:00';
+    const h = parseInt(m[1] || 0);
+    const min = parseInt(m[2] || 0);
+    const sec = parseInt(m[3] || 0);
+    if (h > 0) return `${h}:${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    return `${min}:${String(sec).padStart(2,'0')}`;
+  }
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  let toastTimer = null;
+  function showToast(message, type = 'success') {
+    toastMsg.textContent  = message;
+    toastIcon.textContent = type === 'error' ? 'error_outline'
+                          : type === 'warn'  ? 'warning_amber'
+                          :                    'check_circle';
+    toastIcon.className = `material-icons-round text-[18px] ${
+      type === 'error' ? 'text-red-400' :
+      type === 'warn'  ? 'text-amber-400' : 'text-orange-400'
+    }`;
+    toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function setProgress(label, current, total) {
+    progressWrapper.classList.remove('hidden');
+    progressLabel.textContent = label;
+    progressCount.textContent = total ? `${current} / ${total}` : '';
+    progressBar.style.width = total ? Math.round((current / total) * 100) + '%' : '0%';
+  }
+
+  function hideProgress() {
+    progressWrapper.classList.add('hidden');
+    progressBar.style.width = '0%';
+  }
+
+  /* ── YOUTUBE API ───────────────────────────────── */
+
+  async function fetchPlaylist(playlistId) {
+    const apiKey = getApiKey();
+    if (!apiKey || apiKey.startsWith('INSEREAZĂ')) {
+      throw new Error('API Key lipsă. Introdu un YouTube Data API v3 Key valid.');
+    }
+
+    // Pasul 1: metadate playlist
+    setProgress('Se preia titlul playlist-ului…', 0, null);
+    const metaRes  = await fetch(`${YT_API_BASE}/playlists?part=snippet&id=${encodeURIComponent(playlistId)}&key=${encodeURIComponent(apiKey)}`);
+    const metaData = await metaRes.json();
+    if (!metaRes.ok) throw new Error(`API Error: ${metaData?.error?.message || `HTTP ${metaRes.status}`}`);
+    if (!metaData.items?.length) throw new Error('Playlist negăsit. Verifică dacă e public și ID-ul e corect.');
+    const playlistTitle = metaData.items[0].snippet.title;
+
+    // Pasul 2: toate clipurile (paginated)
+    const videoItems = [];
+    let pageToken = null, pageCount = 0;
+    do {
+      pageCount++;
+      setProgress(`Se preiau clipuri (pagina ${pageCount})…`, videoItems.length, null);
+      const pageUrl = new URL(`${YT_API_BASE}/playlistItems`);
+      pageUrl.searchParams.set('part', 'snippet,contentDetails');
+      pageUrl.searchParams.set('playlistId', playlistId);
+      pageUrl.searchParams.set('maxResults', MAX_RESULTS);
+      pageUrl.searchParams.set('key', apiKey);
+      if (pageToken) pageUrl.searchParams.set('pageToken', pageToken);
+
+      const pageRes  = await fetch(pageUrl.toString());
+      const pageData = await pageRes.json();
+      if (!pageRes.ok) throw new Error(`API Error (pagina ${pageCount}): ${pageData?.error?.message || `HTTP ${pageRes.status}`}`);
+
+      for (const item of (pageData.items || [])) {
+        const snippet = item.snippet;
+        if (snippet.title === 'Deleted video' || snippet.title === 'Private video') continue;
+        videoItems.push({
+          videoId: snippet.resourceId?.videoId || item.contentDetails?.videoId,
+          title:   snippet.title,
+        });
+      }
+      pageToken = pageData.nextPageToken || null;
+    } while (pageToken);
+
+    if (!videoItems.length) throw new Error('Playlist-ul nu conține clipuri vizibile.');
+
+    // Pasul 3: durate (batch de 50)
+    const durations = {};
+    const videoIds  = videoItems.map(v => v.videoId).filter(Boolean);
+    const batches   = [];
+    for (let i = 0; i < videoIds.length; i += 50) batches.push(videoIds.slice(i, i + 50));
+
+    for (let b = 0; b < batches.length; b++) {
+      setProgress(`Se preiau duratele… (batch ${b + 1}/${batches.length})`, b * 50, videoIds.length);
+      const durUrl = new URL(`${YT_API_BASE}/videos`);
+      durUrl.searchParams.set('part', 'contentDetails');
+      durUrl.searchParams.set('id', batches[b].join(','));
+      durUrl.searchParams.set('key', apiKey);
+      const durRes  = await fetch(durUrl.toString());
+      const durData = await durRes.json();
+      if (durRes.ok) {
+        for (const item of (durData.items || [])) {
+          durations[item.id] = iso8601ToDuration(item.contentDetails?.duration);
+        }
+      }
+    }
+
+    const videos = videoItems.map(v => ({
+      title:    v.title,
+      url:      `https://www.youtube.com/watch?v=${v.videoId}`,
+      duration: durations[v.videoId] || '0:00',
+    }));
+
+    return { title: playlistTitle, videos };
+  }
+
+  /* ── UI RENDERING ──────────────────────────────── */
+
+  function renderQueue() {
+    playlistQueue.innerHTML = '';
+    emptyState.classList.toggle('hidden', playlists.length > 0);
+
+    const totalVideos = playlists.reduce((s, p) => s + p.videos.length, 0);
+    if (playlists.length > 0) {
+      totalBadge.textContent = `${playlists.length} playlist-uri · ${totalVideos} clipuri`;
+      totalBadge.classList.remove('hidden');
+    } else {
+      totalBadge.classList.add('hidden');
+    }
+
+    playlists.forEach((pl, idx) => {
+      const card = createPlaylistCard(pl, idx);
+      card.style.animationDelay = `${idx * 0.04}s`;
+      playlistQueue.appendChild(card);
+    });
+
+    generateBtn.disabled = playlists.length === 0;
+    updateJsonPreview();
+  }
+
+  function createPlaylistCard(pl, idx) {
+    const card = document.createElement('div');
+    card.className = `pl-card rounded-2xl overflow-hidden
+      bg-white/3 border border-white/8
+      hover:border-white/15 transition-all duration-200`;
+
+    card.innerHTML = `
+      <!-- Card header -->
+      <div class="flex items-center gap-3 px-4 py-3 cursor-pointer select-none" data-toggle="${idx}">
+        <div class="w-8 h-8 flex-shrink-0 rounded-xl bg-orange-500/15 border border-orange-500/20
+                    flex items-center justify-center">
+          <span class="material-icons-round text-orange-400 text-[16px]">queue_music</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[14px] font-semibold text-white truncate">${esc(pl.title)}</p>
+          <p class="text-[11px] text-zinc-500 font-mono">${pl.videos.length} clipuri</p>
+        </div>
+        <button class="edit-title-btn w-7 h-7 flex items-center justify-center rounded-lg
+                       text-zinc-700 hover:text-zinc-400 hover:bg-white/5
+                       transition-all duration-150"
+                data-idx="${idx}" title="Redenumește">
+          <span class="material-icons-round text-[14px]">edit</span>
+        </button>
+        <button class="remove-btn w-7 h-7 flex items-center justify-center rounded-lg
+                       text-zinc-700 hover:text-red-400 hover:bg-red-900/20
+                       transition-all duration-150"
+                data-idx="${idx}" title="Elimină">
+          <span class="material-icons-round text-[14px]">close</span>
+        </button>
+        <span class="material-icons-round chevron text-[18px] text-zinc-700 flex-shrink-0">expand_more</span>
+      </div>
+
+      <!-- Video list (collapsed) -->
+      <div class="video-list" data-list="${idx}">
+        <div class="px-4 pb-3 pt-1 border-t border-white/5 space-y-0.5 max-h-[280px] overflow-y-auto">
+          ${pl.videos.map((v, vi) => `
+            <div class="video-row flex items-center gap-2.5 px-2 py-1.5 rounded-lg group">
+              <span class="text-[10px] font-mono text-zinc-700 w-5 text-right flex-shrink-0">${vi + 1}</span>
+              <p class="flex-1 text-[12px] text-zinc-400 truncate">${esc(v.title)}</p>
+              <span class="text-[10px] font-mono text-zinc-600 flex-shrink-0">${esc(v.duration)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    card.querySelector('[data-toggle]').addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      card.querySelector('.video-list').classList.toggle('open');
+      card.querySelector('.chevron').classList.toggle('open');
+    });
+    card.querySelector('.remove-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      playlists.splice(parseInt(e.currentTarget.dataset.idx), 1);
+      renderQueue();
+      showToast('Playlist eliminat.', 'warn');
+    });
+    card.querySelector('.edit-title-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      const i   = parseInt(e.currentTarget.dataset.idx);
+      const newT = prompt('Redenumește playlist-ul:', playlists[i].title);
+      if (newT && newT.trim()) { playlists[i].title = newT.trim(); renderQueue(); }
+    });
+
+    return card;
+  }
+
+  /* ── JSON PREVIEW ──────────────────────────────── */
+
+  function updateJsonPreview() {
+    if (!playlists.length) {
+      jsonPreview.innerHTML = `<span class="text-zinc-700">// JSON-ul generat va apărea aici.\n// Adaugă cel puțin un playlist și apasă "Fetch".</span>`;
+      previewBadge.classList.add('hidden');
+      return;
+    }
+    const json = JSON.stringify(buildDataObject(), null, 2);
+    const highlighted = json
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"(title|url|duration|playlists|videos)":/g,'<span style="color:#fb923c">"\$1"</span>:')
+      .replace(/: "([^"]*)"([,\n])/g,': <span style="color:#86efac">"\$1"</span>\$2')
+      .replace(/: "([^"]*)"$/gm,': <span style="color:#86efac">"\$1"</span>')
+      .replace(/(\[|\]|\{|\})/g,'<span style="color:#94a3b8">\$1</span>');
+    jsonPreview.innerHTML = highlighted;
+
+    const totalV = playlists.reduce((s,p) => s + p.videos.length, 0);
+    previewBadge.textContent = `${playlists.length}pl · ${totalV}v`;
+    previewBadge.classList.remove('hidden');
+  }
+
+  function buildDataObject() {
+    return { playlists: playlists.map(pl => ({ title: pl.title, videos: pl.videos })) };
+  }
+
+  /* ── ACTIONS ───────────────────────────────────── */
+
+  async function handleAddPlaylist() {
+    const url = urlInput.value.trim();
+    if (!url) { showToast('Introdu un URL de playlist.', 'warn'); return; }
+
+    const playlistId = extractPlaylistId(url);
+    if (!playlistId) { showToast('URL invalid. Nu am găsit un Playlist ID (?list=).', 'error'); return; }
+    if (playlists.some(p => p.id === playlistId)) { showToast('Acest playlist a fost deja adăugat.', 'warn'); return; }
+
+    addBtn.disabled  = true;
+    addBtn.innerHTML = `<span class="material-icons-round text-[16px] animate-spin-slow">refresh</span> Se încarcă…`;
+
+    try {
+      const pl = await fetchPlaylist(playlistId);
+      pl.id = playlistId;
+      playlists.push(pl);
+      urlInput.value = '';
+      renderQueue();
+      hideProgress();
+      showToast(`„${pl.title}" — ${pl.videos.length} clipuri adăugate!`);
+      if (playlists.length === 1) {
+        setTimeout(() => {
+          document.querySelector('.video-list[data-list="0"]')?.classList.add('open');
+          document.querySelector('.chevron')?.classList.add('open');
+        }, 100);
+      }
+    } catch (err) {
+      hideProgress();
+      showToast(err.message, 'error');
+      console.error('[Builder]', err);
+    } finally {
+      addBtn.disabled  = false;
+      addBtn.innerHTML = `<span class="material-icons-round text-[16px]">add</span> Fetch`;
+    }
+  }
+
+  function handleGenerate() {
+    if (!playlists.length) return;
+    const json     = JSON.stringify(buildDataObject(), null, 2);
+    const blob     = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url      = URL.createObjectURL(blob);
+    const filename = (filenameInput.value.trim() || 'data') +
+                     (filenameInput.value.endsWith('.json') ? '' : '.json');
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const totalV = playlists.reduce((s,p) => s + p.videos.length, 0);
+    showToast(`${filename} descărcat — ${playlists.length} playlisturi, ${totalV} clipuri.`);
+  }
+
+  function handleClear() {
+    if (!playlists.length) return;
+    if (!confirm(`Ștergi toate cele ${playlists.length} playlist-uri din queue?`)) return;
+    playlists.length = 0;
+    renderQueue();
+    showToast('Queue resetat.', 'warn');
+  }
+
+  async function handleCopyJson() {
+    if (!playlists.length) return;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(buildDataObject(), null, 2));
+      showToast('JSON copiat în clipboard!');
+    } catch {
+      showToast('Clipboard indisponibil.', 'warn');
+    }
+  }
+
+  /* ── EVENT LISTENERS ───────────────────────────── */
+
+  addBtn.addEventListener('click', handleAddPlaylist);
+  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleAddPlaylist(); });
+  toggleApiKeyBtn.addEventListener('click', () => {
+    const isPwd = apiKeyInput.type === 'password';
+    apiKeyInput.type     = isPwd ? 'text' : 'password';
+    eyeIcon.textContent  = isPwd ? 'visibility' : 'visibility_off';
+  });
+  generateBtn.addEventListener('click', handleGenerate);
+  clearBtn.addEventListener('click', handleClear);
+  copyJsonBtn.addEventListener('click', handleCopyJson);
+
+  urlInput.addEventListener('dragover', e => e.preventDefault());
+  urlInput.addEventListener('drop', e => {
+    e.preventDefault();
+    const text = e.dataTransfer.getData('text/plain');
+    if (text) { urlInput.value = text; urlInput.focus(); }
+  });
+
+  renderQueue();
+  </script>
+</body>
+</html>
