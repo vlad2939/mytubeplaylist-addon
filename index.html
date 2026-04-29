@@ -3,6 +3,11 @@
 <head>
     <meta charset="utf-8">
     <title>YT Dashboard</title>
+    <!-- CRITIC: Previne trimiterea URL-ului intern Home Assistant Ingress
+         (/api/hassio_ingress/<token>/) către YouTube ca Referer header.
+         Fără acest tag, YouTube returnează Error 153 (player config error)
+         deoarece consideră originea nevalidă. -->
+    <meta name="referrer" content="no-referrer">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">

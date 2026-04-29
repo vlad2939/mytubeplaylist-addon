@@ -2,7 +2,7 @@
 
 Un dashboard personal pentru vizionarea clipurilor YouTube organizate în playlist-uri, construit cu tehnologii web pure. Elimină complet algoritmii de recomandare, reclamele vizuale și distracțiile platformei originale — rămâne doar conținutul tău.
 
-![Versiune](https://img.shields.io/badge/versiune-1.0.1-blue.svg)
+![Versiune](https://img.shields.io/badge/versiune-1.0.2-blue.svg)
 ![Tema Dark/Light](https://img.shields.io/badge/Tema-Dark%20%2F%20Light-orange?style=flat-square)
 ![Vanilla JS](https://img.shields.io/badge/JS-Vanilla%20ES6%2B-yellow?style=flat-square)
 ![Tailwind CSS](https://img.shields.io/badge/CSS-Tailwind%20CDN-38bdf8?style=flat-square)
