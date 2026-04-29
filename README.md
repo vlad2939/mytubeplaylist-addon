@@ -1,4 +1,4 @@
-# 📺 Minimalist YouTube Dashboard
+# 📺 Minimalist YouTube Playlist - viewer & editor
 
 Un dashboard personal pentru vizionarea clipurilor YouTube organizate în playlist-uri, construit cu tehnologii web pure. Elimină complet algoritmii de recomandare, reclamele vizuale și distracțiile platformei originale — rămâne doar conținutul tău.
 
