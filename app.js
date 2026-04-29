@@ -633,8 +633,8 @@ function renderPlayer(video, playlistIdx, videoIdx) {
         src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0&modestbranding=1&origin=https://www.youtube.com"
         title="${esc(video.title)}"
         frameborder="0"
-        referrerpolicy="no-referrer"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
         allowfullscreen
         class="absolute inset-0 w-full h-full"
       ></iframe>
