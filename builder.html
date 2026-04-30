@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="ro" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +12,7 @@
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -39,6 +40,18 @@
         },
       },
     };
+  </script>
+
+  <script>
+    // Initializare tema fara flash
+    (function() {
+      var saved = localStorage.getItem('builder-theme');
+      if (saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    })();
   </script>
 
   <style>
@@ -107,249 +120,459 @@
     .video-list.open { max-height: 9999px; }
     .chevron { transition: transform 0.25s ease; }
     .chevron.open { transform: rotate(180deg); }
+
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 24px;
+      padding: 28px;
+      width: 100%; max-width: 480px;
+      box-shadow: 0 32px 64px rgba(0,0,0,0.6);
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    }
+    .modal-overlay.open .modal-box {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Video row în editor — buton delete vizibil la hover */
+    .video-row-edit .del-video-btn { opacity: 0; transition: opacity 0.15s; }
+    .video-row-edit:hover .del-video-btn { opacity: 1; }
+
+    /* Drag reorder handle */
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
+    .video-row-edit.drag-over {
+      border-top: 2px solid rgba(249,115,22,0.6);
+    }
+
+    /* ── LIGHT MODE overrides ─────────────────────── */
+    /* Scrollbar light */
+    html:not(.dark) ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.12);
+    }
+    html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+      background: rgba(249,115,22,0.40);
+    }
+    /* Input color scheme light */
+    html:not(.dark) input,
+    html:not(.dark) select { color-scheme: light; }
+
+    /* Modal light */
+    html:not(.dark) .modal-box {
+      background: #ffffff;
+      border-color: rgba(0,0,0,0.08);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.15);
+    }
+
+    /* Theme toggle button */
+    #themeToggleBtn {
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    #themeToggleBtn:hover { transform: rotate(20deg) scale(1.1); }
+
+    /* JSON preview string values: verde închis în light, verde deschis în dark */
+    .json-str { color: #15803d; }          /* green-700 — lizibil pe fond alb */
+    .dark .json-str,
+    html.dark .json-str { color: #86efac; } /* green-300 — original dark */
+
+    /* JSON preview keys: portocaliu adaptat per temă */
+    .json-key { color: #c2410c; }           /* orange-700 light */
+    .dark .json-key,
+    html.dark .json-key { color: #fb923c; } /* orange-400 dark */
+
+    /* JSON brackets */
+    .json-br { color: #64748b; }            /* slate-500 light */
+    .dark .json-br,
+    html.dark .json-br { color: #94a3b8; }  /* slate-400 dark */
   </style>
 </head>
 
 <!-- bg-[#0a0604] — identic cu dark mode al dashboard-ului -->
-<body class="bg-[#0a0604] text-zinc-100 min-h-screen overflow-x-hidden antialiased relative
-             selection:bg-orange-500/30 selection:text-white">
+<body class="bg-zinc-100 dark:bg-[#0a0604] text-zinc-900 dark:text-zinc-100
+             min-h-screen overflow-x-hidden antialiased relative
+             selection:bg-orange-500/30 selection:text-black dark:selection:text-white
+             transition-colors duration-500">
 
-  <!-- BLOBS — identici cu dashboard (yellow/amber/orange dark) -->
+  <!-- BLOBS — Light: cyan/sky/teal | Dark: yellow/amber/orange -->
   <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
     <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full
-                bg-yellow-500/20 blur-[100px] animate-blob
-                mix-blend-screen transition-colors duration-1000"></div>
+                bg-cyan-400/30 dark:bg-yellow-500/20 blur-[100px] animate-blob
+                mix-blend-multiply dark:mix-blend-screen transition-colors duration-1000"></div>
     <div class="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full
-                bg-amber-500/20 blur-[120px] animate-blob
-                mix-blend-screen transition-colors duration-1000"
+                bg-sky-400/30 dark:bg-amber-500/20 blur-[120px] animate-blob
+                mix-blend-multiply dark:mix-blend-screen transition-colors duration-1000"
          style="animation-delay:2s"></div>
     <div class="absolute bottom-[-20%] left-[10%] w-[40%] h-[40%] rounded-full
-                bg-orange-500/15 blur-[100px] animate-blob
-                mix-blend-screen transition-colors duration-1000"
+                bg-teal-400/30 dark:bg-orange-500/15 blur-[100px] animate-blob
+                mix-blend-multiply dark:mix-blend-screen transition-colors duration-1000"
          style="animation-delay:4s"></div>
   </div>
 
-  <!-- WRAPPER — p-4 lg:p-6 gap-6, identic cu dashboard -->
-  <div class="relative z-10 flex h-screen p-4 lg:p-6 gap-6 w-full max-w-[1800px] mx-auto overflow-hidden">
+  <!-- WRAPPER — 3 panouri egale, p-4 lg:p-6 gap-6 -->
+  <div class="relative z-10 flex h-screen p-4 lg:p-6 gap-6 w-full max-w-[2000px] mx-auto overflow-hidden">
 
     <!-- ══════════════════════════════════════════════
-         PANOU STÂNGA — inputs & controls
-         Glass panel identic cu sidebar-ul dashboard
+         PANOU STÂNGA — API Key, Fetch URL, Progress (20%)
     ═══════════════════════════════════════════════ -->
-    <div class="w-[480px] flex-shrink-0 flex flex-col
-                bg-white/5 backdrop-blur-2xl
-                border border-white/10
+    <div class="w-[20%] flex-shrink-0 flex flex-col
+                bg-white/70 dark:bg-white/5 backdrop-blur-2xl
+                border border-white/50 dark:border-white/10
                 rounded-3xl overflow-hidden
-                shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
 
-      <!-- Header panou -->
-      <div class="h-20 flex items-center px-6
-                  border-b border-white/5 flex-shrink-0">
-        <div class="flex items-center gap-3">
-          <a href="index.html" title="Înapoi la Dashboard"
-             class="w-8 h-8 rounded-xl bg-white/5 border border-white/10
-                    flex items-center justify-center
-                    hover:bg-orange-900/30 hover:border-orange-700/50 hover:text-orange-400
-                    text-zinc-500 transition-all duration-200 group">
-            <span class="material-icons-round text-[16px]">arrow_back</span>
-          </a>
-          <div class="w-8 h-8 rounded-xl bg-zinc-900 border border-white/10
-                      flex items-center justify-center shadow-lg shadow-orange-500/20">
+      <!-- Header -->
+      <div class="h-20 relative flex items-center px-6
+                  border-b border-zinc-200/50 dark:border-white/5
+                  flex-shrink-0 transition-colors duration-300">
+        <!-- Buton Back — stânga -->
+        <a href="index.html" title="Înapoi la Dashboard"
+           class="w-9 h-9 rounded-xl
+                  bg-black/5 dark:bg-white/5
+                  border border-black/8 dark:border-white/10
+                  flex items-center justify-center flex-shrink-0
+                  hover:bg-orange-50 dark:hover:bg-orange-900/25
+                  hover:border-orange-300 dark:hover:border-orange-700/50
+                  hover:text-orange-600 dark:hover:text-orange-400
+                  text-zinc-500 dark:text-zinc-400
+                  focus:outline-none focus:ring-2 focus:ring-orange-500/50
+                  transition-all duration-200">
+          <span class="material-icons-round text-[18px]">arrow_back</span>
+        </a>
+        <!-- Titlu + iconița — centrate absolut -->
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-zinc-900 dark:bg-zinc-900
+                      border border-black/10 dark:border-white/10
+                      flex items-center justify-center shadow-lg shadow-orange-500/20 flex-shrink-0">
             <span class="material-icons-round text-white text-[16px]">construction</span>
           </div>
-          <div>
-            <p class="font-bold text-[18px] tracking-tight text-white leading-tight">JSON Builder</p>
-            <p class="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">YT Dashboard Tool</p>
+          <div class="text-center">
+            <p class="font-bold text-[17px] tracking-tight text-zinc-900 dark:text-white leading-tight whitespace-nowrap">JSON Builder</p>
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase tracking-widest whitespace-nowrap">YT Dashboard Tool</p>
           </div>
         </div>
+        <!-- Toggle temă — dreapta -->
+        <button id="themeToggleBtn" type="button"
+                aria-label="Schimbă tema" title="Schimbă tema light / dark"
+                class="ml-auto w-9 h-9 flex items-center justify-center rounded-xl
+                       bg-black/5 dark:bg-white/5
+                       border border-black/8 dark:border-white/10
+                       text-zinc-500 dark:text-zinc-400
+                       hover:text-orange-600 dark:hover:text-orange-400
+                       hover:bg-orange-50 dark:hover:bg-orange-900/25
+                       hover:border-orange-300 dark:hover:border-orange-700/50
+                       focus:outline-none focus:ring-2 focus:ring-orange-500/50
+                       transition-all duration-200">
+          <span id="themeIcon" class="material-icons-round text-[20px]">light_mode</span>
+        </button>
       </div>
 
-      <!-- Scrollable content -->
-      <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5
+      <!-- Scrollable content — sistem uniform: toate inputurile py-3.5, toate butoanele full-width -->
+      <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6
                   [&::-webkit-scrollbar]:w-2
                   [&::-webkit-scrollbar-thumb]:rounded-full
-                  [&::-webkit-scrollbar-thumb]:bg-white/10
-                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
+                  [&::-webkit-scrollbar-thumb]:bg-black/10
+                  dark:[&::-webkit-scrollbar-thumb]:bg-white/10
+                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/40
+                  dark:[&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
 
-        <!-- Descriere -->
-        <p class="text-[13px] text-zinc-400 leading-relaxed">
-          Adaugă link-uri de playlist-uri YouTube și generează automat un fișier
-          <code class="bg-white/8 px-1.5 py-0.5 rounded text-orange-400 text-[11px]">data.json</code>
-          compatibil cu dashboard-ul.
-        </p>
+        <!-- ── SECȚIUNEA 1: Deschide JSON existent ── -->
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold uppercase tracking-widest
+                        text-zinc-400 dark:text-zinc-500">
+            Editare fișier existent
+          </label>
+          <button id="loadJsonBtn" type="button"
+                  class="w-full flex items-center gap-3 px-4 py-3.5
+                         bg-white/70 dark:bg-white/5
+                         border border-zinc-200 dark:border-white/10
+                         rounded-2xl
+                         text-zinc-700 dark:text-zinc-300
+                         hover:bg-orange-50 dark:hover:bg-orange-900/20
+                         hover:border-orange-300 dark:hover:border-orange-700/50
+                         hover:text-orange-600 dark:hover:text-orange-400
+                         text-[13px] font-semibold
+                         transition-all duration-200 active:scale-[.98]
+                         focus:outline-none focus:ring-2 focus:ring-orange-400/30">
+            <span class="material-icons-round text-[18px] opacity-60">upload_file</span>
+            <span>Deschide JSON</span>
+          </button>
+          <p class="text-[11px] text-zinc-400 dark:text-zinc-600 leading-relaxed">
+            Încarcă un <code class="bg-black/5 dark:bg-white/8 px-1 rounded text-orange-500 dark:text-orange-400">data.json</code> existent pentru editare sau completare.
+          </p>
+        </div>
 
-        <!-- API KEY -->
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+        <!-- ── SECȚIUNEA 2: API Key ── -->
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold uppercase tracking-widest
+                        text-zinc-400 dark:text-zinc-500">
             YouTube Data API v3 Key
           </label>
           <div class="relative">
-            <span class="material-icons-round absolute left-4 top-1/2 -translate-y-[45%]
-                         text-zinc-600 text-[18px] pointer-events-none">vpn_key</span>
+            <span class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2
+                         text-zinc-400 dark:text-zinc-600 text-[18px] pointer-events-none">vpn_key</span>
             <input id="apiKeyInput" type="password"
-                   placeholder="AIza... — introdu API key-ul tău"
+                   placeholder="AIza..."
                    class="input-field w-full
-                          bg-white/5 border border-white/10 rounded-2xl
-                          pl-11 pr-10 py-3.5
-                          text-zinc-100 placeholder-zinc-600
-                          text-[14px] transition-all duration-200" />
+                          bg-white/70 dark:bg-white/5
+                          border border-zinc-200 dark:border-white/10
+                          rounded-2xl pl-11 pr-10 py-3.5
+                          text-zinc-900 dark:text-zinc-100
+                          placeholder-zinc-400 dark:placeholder-zinc-600
+                          text-[13px] transition-all duration-200
+                          focus:bg-white dark:focus:bg-white/8
+                          focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/20
+                          outline-none" />
             <button id="toggleApiKey"
-                    class="absolute right-3 top-1/2 -translate-y-1/2
-                           text-zinc-600 hover:text-zinc-400 transition-colors duration-150 p-1">
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5
+                           text-zinc-400 dark:text-zinc-600
+                           hover:text-zinc-700 dark:hover:text-zinc-400
+                           transition-colors duration-150 rounded-lg">
               <span id="eyeIcon" class="material-icons-round text-[16px]">visibility_off</span>
             </button>
           </div>
-          <p class="mt-1.5 text-[11px] text-zinc-600 leading-relaxed">
+          <p class="text-[11px] text-zinc-400 dark:text-zinc-600 leading-relaxed">
             Obții gratuit din
             <a href="https://console.cloud.google.com/" target="_blank" rel="noopener"
-               class="text-orange-500/70 hover:text-orange-400 underline underline-offset-2">
-              Google Cloud Console
-            </a>
-            → APIs &amp; Services → Credentials → Create API Key →
-            activează <em>YouTube Data API v3</em>.
+               class="text-orange-500/80 hover:text-orange-500 underline underline-offset-2">Google Cloud Console</a>
+            → APIs &amp; Services → Credentials → Create API Key → activează <em>YouTube Data API v3</em>.
           </p>
         </div>
 
-        <!-- ADD PLAYLIST URL -->
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+        <!-- ── SECȚIUNEA 3: Link Playlist + Fetch ── -->
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold uppercase tracking-widest
+                        text-zinc-400 dark:text-zinc-500">
             Link Playlist YouTube
           </label>
-          <div class="flex gap-2">
-            <div class="relative flex-1">
-              <span class="material-icons-round absolute left-4 top-1/2 -translate-y-[45%]
-                           text-zinc-600 text-[18px] pointer-events-none">link</span>
-              <input id="urlInput" type="url"
-                     placeholder="https://www.youtube.com/playlist?list=PL..."
-                     class="input-field w-full
-                            bg-white/5 border border-white/10 rounded-2xl
-                            pl-11 pr-3 py-3.5
-                            text-zinc-100 placeholder-zinc-600
-                            text-[14px] transition-all duration-200" />
-            </div>
-            <button id="addBtn"
-                    class="flex-shrink-0 flex items-center gap-1.5 px-5 py-3 rounded-2xl
-                           text-[14px] font-semibold
-                           bg-orange-500 hover:bg-orange-400
-                           text-white shadow-lg shadow-orange-500/25
-                           border border-orange-400/50
-                           transition-all duration-200 active:scale-95
-                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-orange-500">
-              <span class="material-icons-round text-[16px]">add</span>
-              Fetch
-            </button>
+          <div class="relative">
+            <span class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2
+                         text-zinc-400 dark:text-zinc-600 text-[18px] pointer-events-none">link</span>
+            <input id="urlInput" type="url"
+                   placeholder="https://youtube.com/playlist?list=PL..."
+                   class="input-field w-full
+                          bg-white/70 dark:bg-white/5
+                          border border-zinc-200 dark:border-white/10
+                          rounded-2xl pl-11 pr-4 py-3.5
+                          text-zinc-900 dark:text-zinc-100
+                          placeholder-zinc-400 dark:placeholder-zinc-600
+                          text-[13px] transition-all duration-200
+                          focus:bg-white dark:focus:bg-white/8
+                          focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/20
+                          outline-none" />
           </div>
-          <p class="mt-1.5 text-[11px] text-zinc-600">
-            Funcționează cu orice playlist public sau neinlistat (nu privat).
+          <!-- Buton Fetch — full width, identic ca înălțime cu celelalte butoane -->
+          <button id="addBtn"
+                  class="w-full flex items-center justify-center gap-2.5
+                         px-4 py-3.5 rounded-2xl
+                         text-[13px] font-semibold
+                         bg-orange-500 hover:bg-orange-400
+                         text-white shadow-lg shadow-orange-500/20
+                         border border-orange-400/50
+                         transition-all duration-200 active:scale-[.98]
+                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-orange-500">
+            <span class="material-icons-round text-[18px]">cloud_download</span>
+            Fetch Playlist din YouTube
+          </button>
+          <p class="text-[11px] text-zinc-400 dark:text-zinc-600 leading-relaxed">
+            Funcționează cu orice playlist public sau neinlistat.
           </p>
         </div>
 
-        <!-- PROGRESS BAR -->
-        <div id="progressWrapper" class="hidden">
-          <div class="flex items-center justify-between mb-1.5">
-            <span id="progressLabel" class="text-[12px] text-zinc-400"></span>
-            <span id="progressCount" class="text-[11px] font-mono text-orange-400"></span>
+        <!-- ── PROGRESS BAR (hidden by default) ── -->
+        <div id="progressWrapper" class="hidden space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span id="progressLabel" class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium"></span>
+            <span id="progressCount" class="text-[11px] font-mono text-orange-500 dark:text-orange-400"></span>
           </div>
-          <div class="h-1.5 rounded-full bg-white/5 overflow-hidden">
+          <div class="h-2 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden">
             <div id="progressBar" class="progress-bar h-full rounded-full w-0"></div>
           </div>
         </div>
 
-        <!-- PLAYLIST QUEUE -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
-              Playlist-uri încărcate
-            </label>
-            <span id="totalBadge"
-                  class="hidden text-[10px] font-mono
-                         bg-orange-500/15 text-orange-400
-                         border border-orange-500/20
-                         px-2 py-0.5 rounded-full"></span>
-          </div>
-
-          <!-- Empty state -->
-          <div id="emptyState"
-               class="flex flex-col items-center justify-center py-10 rounded-2xl
-                      border border-dashed border-white/8 text-center">
-            <span class="material-icons-round text-[36px] text-zinc-700 mb-2">playlist_add</span>
-            <p class="text-[13px] text-zinc-600">Niciun playlist adăugat încă.</p>
-            <p class="text-[11px] text-zinc-700 mt-0.5">Introdu un link mai sus și apasă Fetch.</p>
-          </div>
-
-          <!-- Playlist cards -->
-          <div id="playlistQueue" class="space-y-2"></div>
-        </div>
-
-      </div><!-- end scrollable -->
+      </div><!-- end scrollable stânga -->
 
       <!-- BOTTOM ACTION BAR -->
-      <div class="px-5 py-4 border-t border-white/5
-                  bg-black/20 backdrop-blur-md flex-shrink-0 space-y-2.5">
+      <div class="px-5 py-4 border-t border-zinc-200/50 dark:border-white/5
+                  bg-white/30 dark:bg-black/20 backdrop-blur-md
+                  flex-shrink-0 space-y-3 transition-colors duration-300">
 
-        <!-- Custom filename -->
-        <div class="flex items-center gap-2.5">
-          <span class="material-icons-round text-[16px] text-zinc-600">edit_note</span>
-          <input id="filenameInput" type="text" value="data.json"
-                 class="input-field flex-1 px-3 py-2 rounded-xl text-[12px] font-mono
-                        bg-white/5 border border-white/10
-                        text-zinc-300 placeholder-zinc-600
-                        transition-all duration-200" />
+        <!-- Filename input — același stil ca celelalte inputuri -->
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold uppercase tracking-widest
+                        text-zinc-400 dark:text-zinc-500">
+            Nume fișier
+          </label>
+          <div class="relative">
+            <span class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2
+                         text-zinc-400 dark:text-zinc-600 text-[16px] pointer-events-none">edit_note</span>
+            <input id="filenameInput" type="text" value="data.json"
+                   class="input-field w-full
+                          bg-white/70 dark:bg-white/5
+                          border border-zinc-200 dark:border-white/10
+                          rounded-2xl pl-11 pr-4 py-3.5
+                          text-zinc-900 dark:text-zinc-100
+                          placeholder-zinc-400 dark:placeholder-zinc-600
+                          font-mono text-[13px] transition-all duration-200
+                          focus:bg-white dark:focus:bg-white/8
+                          focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/20
+                          outline-none" />
+          </div>
         </div>
 
-        <!-- Generate + Clear -->
+        <!-- Generate + Clear — butoanele principale -->
         <div class="flex gap-2">
           <button id="generateBtn" disabled
                   class="flex-1 flex items-center justify-center gap-2
-                         px-4 py-3 rounded-2xl text-[14px] font-semibold
+                         px-4 py-3.5 rounded-2xl
+                         text-[13px] font-semibold
                          bg-orange-500 hover:bg-orange-400
                          text-white shadow-lg shadow-orange-500/20
                          border border-orange-400/50
                          disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-orange-500
                          transition-all duration-200 active:scale-[.98]">
             <span class="material-icons-round text-[18px]">download</span>
-            Generează &amp; Descarcă JSON
+            Generează &amp; Descarcă
           </button>
           <button id="clearBtn"
-                  class="w-12 flex items-center justify-center rounded-2xl
-                         bg-white/5 border border-white/10
-                         hover:bg-red-900/30 hover:border-red-800/50 hover:text-red-400
-                         text-zinc-600 transition-all duration-200 active:scale-95"
-                  title="Șterge tot">
+                  class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl
+                         bg-black/5 dark:bg-white/5
+                         border border-black/8 dark:border-white/10
+                         hover:bg-red-50 dark:hover:bg-red-900/25
+                         hover:border-red-300 dark:hover:border-red-800/50
+                         hover:text-red-500 dark:hover:text-red-400
+                         text-zinc-500 dark:text-zinc-400
+                         focus:outline-none focus:ring-2 focus:ring-red-500/30
+                         transition-all duration-200 active:scale-[.98]"
+                  title="Resetează tot">
             <span class="material-icons-round text-[18px]">delete_outline</span>
           </button>
         </div>
 
       </div>
-    </div>
+    </div><!-- end panou stânga -->
 
     <!-- ══════════════════════════════════════════════
-         PANOU DREAPTA — JSON live preview
-         Glass panel identic cu main panel dashboard
+         PANOU MIJLOC — Editor playlist-uri (40%)
+    ═══════════════════════════════════════════════ -->
+    <div class="w-[40%] flex-shrink-0 flex flex-col
+                bg-white/70 dark:bg-white/5 backdrop-blur-2xl
+                border border-white/50 dark:border-white/10
+                rounded-3xl overflow-hidden
+                shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+
+      <!-- Header mijloc -->
+      <div class="h-20 relative flex items-center px-6
+                  border-b border-zinc-200/50 dark:border-white/5
+                  flex-shrink-0 transition-colors duration-300">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-orange-500/15 dark:bg-orange-500/15
+                      border border-orange-500/25
+                      flex items-center justify-center">
+            <span class="material-icons-round text-orange-500 text-[18px]">queue_music</span>
+          </div>
+          <div>
+            <p class="font-bold text-[18px] tracking-tight text-zinc-900 dark:text-white leading-tight">Playlist-uri</p>
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase tracking-widest">Editor</p>
+          </div>
+        </div>
+        <!-- Badge — centrat absolut -->
+        <span id="totalBadge"
+              class="hidden absolute left-1/2 -translate-x-1/2
+                     text-[11px] font-semibold
+                     bg-orange-500/15 text-orange-500 dark:text-orange-400
+                     border border-orange-500/20
+                     px-2.5 py-1 rounded-full whitespace-nowrap"></span>
+        <div class="ml-auto">
+          <button id="addManualPlaylistBtn" type="button"
+                  title="Adaugă playlist manual"
+                  class="flex items-center gap-1.5 px-3 py-2 rounded-xl
+                         text-[12px] font-semibold
+                         bg-black/5 dark:bg-white/5
+                         border border-black/8 dark:border-white/10
+                         hover:bg-orange-50 dark:hover:bg-orange-900/25
+                         hover:border-orange-300 dark:hover:border-orange-700/50
+                         hover:text-orange-600 dark:hover:text-orange-400
+                         text-zinc-500 dark:text-zinc-400
+                         focus:outline-none focus:ring-2 focus:ring-orange-500/50
+                         transition-all duration-200 active:scale-95">
+            <span class="material-icons-round text-[14px]">add</span>
+            Playlist nou
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista playlist-uri (scrollable) -->
+      <div class="flex-1 overflow-y-auto px-5 py-4 space-y-2
+                  [&::-webkit-scrollbar]:w-2
+                  [&::-webkit-scrollbar-thumb]:rounded-full
+                  [&::-webkit-scrollbar-thumb]:bg-black/10
+                  dark:[&::-webkit-scrollbar-thumb]:bg-white/10
+                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/40
+                  dark:[&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
+
+        <!-- Empty state -->
+        <div id="emptyState"
+             class="flex flex-col items-center justify-center h-full min-h-[200px] rounded-2xl
+                    border border-dashed border-black/10 dark:border-white/8 text-center px-6">
+          <span class="material-icons-round text-[40px] text-zinc-300 dark:text-zinc-700 mb-3">playlist_add</span>
+          <p class="text-[14px] font-semibold text-zinc-600 dark:text-zinc-500">Niciun playlist adăugat încă</p>
+          <p class="text-[12px] text-zinc-400 dark:text-zinc-700 mt-1 leading-relaxed">
+            Fetch din YouTube, deschide un JSON existent<br>sau creează un playlist manual.
+          </p>
+        </div>
+
+        <!-- Playlist cards -->
+        <div id="playlistQueue" class="space-y-2"></div>
+
+      </div><!-- end scrollable mijloc -->
+
+    </div><!-- end panou mijloc -->
+
+    <!-- ══════════════════════════════════════════════
+         PANOU DREAPTA — JSON live preview (40%)
     ═══════════════════════════════════════════════ -->
     <div class="flex-1 flex flex-col
-                bg-white/5 backdrop-blur-2xl
-                border border-white/10
+                bg-white/70 dark:bg-white/5 backdrop-blur-2xl
+                border border-white/50 dark:border-white/10
                 rounded-3xl overflow-hidden
-                shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
 
       <!-- Preview header -->
-      <div class="h-20 flex items-center justify-between px-6
-                  border-b border-white/5 flex-shrink-0">
+      <div class="h-20 relative flex items-center px-6
+                  border-b border-zinc-200/50 dark:border-white/5
+                  flex-shrink-0 transition-colors duration-300">
         <div class="flex items-center gap-2.5">
           <span class="material-icons-round text-orange-500 text-[20px]">data_object</span>
-          <h2 class="font-bold text-[18px] tracking-tight text-white">Preview JSON</h2>
-          <span id="previewBadge"
-                class="hidden text-[10px] font-mono
-                       bg-white/5 border border-white/10
-                       px-2 py-0.5 rounded-full text-zinc-500"></span>
+          <h2 class="font-bold text-[18px] tracking-tight text-zinc-900 dark:text-white">Preview JSON</h2>
         </div>
+        <!-- Badge — centrat absolut, același stil ca panoul centru -->
+        <span id="previewBadge"
+              class="hidden absolute left-1/2 -translate-x-1/2
+                     text-[11px] font-semibold
+                     bg-orange-500/15 text-orange-500 dark:text-orange-400
+                     border border-orange-500/20
+                     px-2.5 py-1 rounded-full whitespace-nowrap"></span>
         <button id="copyJsonBtn"
-                class="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-[13px] font-semibold
-                       bg-white/5 border border-white/10
-                       hover:bg-white/10 hover:border-orange-700/40 hover:text-orange-400
-                       text-zinc-500 transition-all duration-200 active:scale-95
-                       focus:outline-none focus:ring-2 focus:ring-orange-500/50">
+                class="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold
+                       bg-black/5 dark:bg-white/5
+                       border border-black/8 dark:border-white/10
+                       hover:bg-orange-50 dark:hover:bg-orange-900/25
+                       hover:border-orange-300 dark:hover:border-orange-700/50
+                       hover:text-orange-600 dark:hover:text-orange-400
+                       text-zinc-500 dark:text-zinc-400
+                       focus:outline-none focus:ring-2 focus:ring-orange-500/50
+                       transition-all duration-200 active:scale-95">
           <span class="material-icons-round text-[14px]">content_copy</span>
           Copiază
         </button>
@@ -359,22 +582,24 @@
       <div class="flex-1 overflow-auto p-6
                   [&::-webkit-scrollbar]:w-2
                   [&::-webkit-scrollbar-thumb]:rounded-full
-                  [&::-webkit-scrollbar-thumb]:bg-white/10
-                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
-        <pre id="jsonPreview" class="text-[11px] text-zinc-600 leading-relaxed whitespace-pre-wrap break-all">
-<span class="text-zinc-700">// JSON-ul generat va apărea aici.
+                  [&::-webkit-scrollbar-thumb]:bg-black/10
+                  dark:[&::-webkit-scrollbar-thumb]:bg-white/10
+                  [&::-webkit-scrollbar-thumb:hover]:bg-orange-500/40
+                  dark:[&::-webkit-scrollbar-thumb:hover]:bg-orange-500/50">
+        <pre id="jsonPreview" class="text-[11px] text-zinc-500 dark:text-zinc-600 leading-relaxed whitespace-pre-wrap break-all">
+<span class="text-zinc-400 dark:text-zinc-700">// JSON-ul generat va apărea aici.
 // Adaugă cel puțin un playlist și apasă "Fetch".</span>
         </pre>
       </div>
 
-    </div>
+    </div><!-- end panou dreapta -->
   </div>
 
   <!-- TOAST -->
   <div id="toast"
        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50
               flex items-center gap-2.5 px-5 py-3 rounded-2xl
-              bg-zinc-900/95 border border-white/10
+              bg-zinc-900/95 dark:bg-zinc-900/95 border border-white/10
               backdrop-blur-xl shadow-2xl shadow-black/40
               text-[13px] font-semibold text-white
               pointer-events-none min-w-[220px]">
@@ -382,13 +607,154 @@
     <span id="toastMsg"></span>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════
+       MODAL — Adaugă clip manual într-un playlist
+  ════════════════════════════════════════════════════ -->
+  <div id="addVideoModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-bold text-[16px] text-zinc-900 dark:text-white tracking-tight">Adaugă clip manual</h3>
+        <button id="closeModalBtn"
+                class="w-8 h-8 flex items-center justify-center rounded-xl
+                       bg-white/5 border border-white/10 text-zinc-500
+                       hover:text-white hover:bg-white/10 transition-all duration-150">
+          <span class="material-icons-round text-[16px]">close</span>
+        </button>
+      </div>
+
+      <!-- Titlu -->
+      <div class="mb-3">
+        <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-500 mb-1.5">Titlu clip *</label>
+        <input id="manualTitle" type="text" placeholder="ex: Tutorial JavaScript ES2024"
+               class="input-field w-full
+                      bg-white/60 dark:bg-white/5
+                      border border-zinc-200 dark:border-white/10 rounded-xl
+                      px-4 py-2.5 text-[14px]
+                      text-zinc-900 dark:text-zinc-100
+                      placeholder-zinc-400 dark:placeholder-zinc-600
+                      transition-all duration-200" />
+      </div>
+
+      <!-- URL -->
+      <div class="mb-3">
+        <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">URL YouTube *</label>
+        <input id="manualUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."
+               class="input-field w-full
+                      bg-white/60 dark:bg-white/5
+                      border border-zinc-200 dark:border-white/10 rounded-xl
+                      px-4 py-2.5 text-[14px]
+                      text-zinc-900 dark:text-zinc-100
+                      placeholder-zinc-400 dark:placeholder-zinc-600
+                      transition-all duration-200" />
+      </div>
+
+      <!-- Durată -->
+      <div class="mb-5">
+        <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">Durată <span class="normal-case text-zinc-600 font-normal">(opțional, ex: 12:34)</span></label>
+        <input id="manualDuration" type="text" placeholder="0:00"
+               class="input-field w-full
+                      bg-white/60 dark:bg-white/5
+                      border border-zinc-200 dark:border-white/10 rounded-xl
+                      px-4 py-2.5 text-[14px]
+                      text-zinc-900 dark:text-zinc-100
+                      placeholder-zinc-400 dark:placeholder-zinc-600
+                      transition-all duration-200" />
+      </div>
+
+      <!-- Playlist target -->
+      <div class="mb-5">
+        <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">Adaugă în playlist</label>
+        <select id="manualPlaylistSelect"
+                class="input-field w-full
+                       bg-zinc-100 dark:bg-zinc-800
+                       border border-zinc-200 dark:border-white/10 rounded-xl
+                       px-4 py-2.5 text-[14px]
+                       text-zinc-900 dark:text-zinc-100
+                       transition-all duration-200">
+        </select>
+      </div>
+
+      <!-- Acțiuni modal -->
+      <div class="flex gap-2">
+        <button id="confirmAddVideoBtn"
+                class="flex-1 flex items-center justify-center gap-2
+                       px-4 py-2.5 rounded-xl text-[14px] font-semibold
+                       bg-orange-500 hover:bg-orange-400 text-white
+                       border border-orange-400/50 shadow-lg shadow-orange-500/20
+                       transition-all duration-200 active:scale-[.98]">
+          <span class="material-icons-round text-[16px]">add</span>
+          Adaugă clip
+        </button>
+        <button id="cancelModalBtn"
+                class="px-4 py-2.5 rounded-xl text-[14px] font-semibold
+                       bg-white/5 border border-white/10
+                       text-zinc-400 hover:text-white hover:bg-white/10
+                       transition-all duration-200 active:scale-95">
+          Anulează
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       MODAL — Adaugă playlist manual (fără API)
+  ════════════════════════════════════════════════════ -->
+  <div id="addManualPlaylistModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-bold text-[16px] text-zinc-900 dark:text-white tracking-tight">Playlist nou (manual)</h3>
+        <button id="closeManualPlaylistModalBtn"
+                class="w-8 h-8 flex items-center justify-center rounded-xl
+                       bg-white/5 border border-white/10 text-zinc-500
+                       hover:text-white hover:bg-white/10 transition-all duration-150">
+          <span class="material-icons-round text-[16px]">close</span>
+        </button>
+      </div>
+      <div class="mb-5">
+        <label class="block text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1.5">Nume playlist *</label>
+        <input id="manualPlaylistName" type="text" placeholder="ex: Tutoriale Python"
+               class="input-field w-full
+                      bg-white/60 dark:bg-white/5
+                      border border-zinc-200 dark:border-white/10 rounded-xl
+                      px-4 py-2.5 text-[14px]
+                      text-zinc-900 dark:text-zinc-100
+                      placeholder-zinc-400 dark:placeholder-zinc-600
+                      transition-all duration-200" />
+      </div>
+      <div class="flex gap-2">
+        <button id="confirmAddManualPlaylistBtn"
+                class="flex-1 flex items-center justify-center gap-2
+                       px-4 py-2.5 rounded-xl text-[14px] font-semibold
+                       bg-orange-500 hover:bg-orange-400 text-white
+                       border border-orange-400/50 shadow-lg shadow-orange-500/20
+                       transition-all duration-200 active:scale-[.98]">
+          <span class="material-icons-round text-[16px]">add</span>
+          Creează playlist
+        </button>
+        <button id="cancelManualPlaylistModalBtn"
+                class="px-4 py-2.5 rounded-xl text-[14px] font-semibold
+                       bg-white/5 border border-white/10
+                       text-zinc-400 hover:text-white hover:bg-white/10
+                       transition-all duration-200 active:scale-95">
+          Anulează
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- fileInput pentru Load JSON — TREBUIE să fie direct în body,
+       în afara oricărui container cu overflow:hidden -->
+  <input id="loadJsonFileInput" type="file" accept=".json,application/json"
+         style="position:fixed;top:-999px;left:-999px;width:1px;height:1px;opacity:0;pointer-events:none;"
+         tabindex="-1" />
+
   <script>
   /* =====================================================
      JSON BUILDER — app logic
      Vanilla JS, YouTube Data API v3, zero dependencies
   ===================================================== */
 
-  const DEFAULT_API_KEY = 'YOUR_DEFAULT_API_KEY';
+  const DEFAULT_API_KEY = 'AIzaSyD-z_Ze2EOd72MXbP4mKYhaAKxc4wrn9gk';
   const YT_API_BASE  = 'https://www.googleapis.com/youtube/v3';
   const MAX_RESULTS  = 50;
 
@@ -417,6 +783,26 @@
   const toast           = document.getElementById('toast');
   const toastMsg        = document.getElementById('toastMsg');
   const toastIcon       = document.getElementById('toastIcon');
+
+  // DOM refs noi — editor features
+  const loadJsonBtn              = document.getElementById('loadJsonBtn');
+  const loadJsonFileInput        = document.getElementById('loadJsonFileInput');
+  const addManualPlaylistBtn     = document.getElementById('addManualPlaylistBtn');
+  // Modal: add video
+  const addVideoModal            = document.getElementById('addVideoModal');
+  const closeModalBtn            = document.getElementById('closeModalBtn');
+  const cancelModalBtn           = document.getElementById('cancelModalBtn');
+  const confirmAddVideoBtn       = document.getElementById('confirmAddVideoBtn');
+  const manualTitle              = document.getElementById('manualTitle');
+  const manualUrl                = document.getElementById('manualUrl');
+  const manualDuration           = document.getElementById('manualDuration');
+  const manualPlaylistSelect     = document.getElementById('manualPlaylistSelect');
+  // Modal: add manual playlist
+  const addManualPlaylistModal        = document.getElementById('addManualPlaylistModal');
+  const closeManualPlaylistModalBtn   = document.getElementById('closeManualPlaylistModalBtn');
+  const cancelManualPlaylistModalBtn  = document.getElementById('cancelManualPlaylistModalBtn');
+  const confirmAddManualPlaylistBtn   = document.getElementById('confirmAddManualPlaylistBtn');
+  const manualPlaylistName            = document.getElementById('manualPlaylistName');
 
   if (DEFAULT_API_KEY && !DEFAULT_API_KEY.startsWith('INSEREAZĂ')) {
     apiKeyInput.value = DEFAULT_API_KEY;
@@ -587,8 +973,30 @@
   function createPlaylistCard(pl, idx) {
     const card = document.createElement('div');
     card.className = `pl-card rounded-2xl overflow-hidden
-      bg-white/3 border border-white/8
-      hover:border-white/15 transition-all duration-200`;
+      bg-white/50 dark:bg-white/3
+      border border-zinc-200/60 dark:border-white/8
+      hover:border-zinc-300 dark:hover:border-white/15
+      transition-all duration-200`;
+
+    // Generează rândurile de clipuri cu buton de ștergere
+    const videoRowsHtml = pl.videos.map((v, vi) => `
+      <div class="video-row-edit flex items-center gap-2 px-2 py-1.5 rounded-lg group
+                  transition-colors duration-150 hover:bg-white/4"
+           data-pl="${idx}" data-vi="${vi}">
+        <span class="drag-handle material-icons-round text-[14px] text-zinc-700
+                     hover:text-zinc-500 flex-shrink-0 select-none"
+              title="Trage pentru a reordona">drag_indicator</span>
+        <span class="text-[10px] font-mono text-zinc-800 w-5 text-right flex-shrink-0">${vi + 1}</span>
+        <p class="flex-1 text-[12px] text-zinc-800 truncate" title="${esc(v.title)}">${esc(v.title)}</p>
+        <span class="text-[10px] font-mono text-zinc-700 flex-shrink-0">${esc(v.duration || '–')}</span>
+        <button class="del-video-btn flex-shrink-0 w-5 h-5 flex items-center justify-center
+                       rounded text-zinc-700 hover:text-red-400 hover:bg-red-900/20
+                       transition-all duration-150"
+                data-pl="${idx}" data-vi="${vi}" title="Șterge clipul">
+          <span class="material-icons-round text-[12px]">close</span>
+        </button>
+      </div>
+    `).join('');
 
     card.innerHTML = `
       <!-- Card header -->
@@ -598,19 +1006,26 @@
           <span class="material-icons-round text-orange-400 text-[16px]">queue_music</span>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-[14px] font-semibold text-white truncate">${esc(pl.title)}</p>
-          <p class="text-[11px] text-zinc-500 font-mono">${pl.videos.length} clipuri</p>
+          <p class="text-[14px] font-semibold text-zinc-900 truncate">${esc(pl.title)}</p>
+          <p class="text-[11px] text-zinc-700 font-mono">${pl.videos.length} clipuri</p>
         </div>
+        <!-- Adaugă clip în acest playlist -->
+        <button class="add-video-btn w-7 h-7 flex items-center justify-center rounded-lg
+                       text-zinc-600 hover:text-orange-400 hover:bg-orange-900/20
+                       transition-all duration-150"
+                data-idx="${idx}" title="Adaugă clip manual">
+          <span class="material-icons-round text-[14px]">add</span>
+        </button>
         <button class="edit-title-btn w-7 h-7 flex items-center justify-center rounded-lg
                        text-zinc-700 hover:text-zinc-400 hover:bg-white/5
                        transition-all duration-150"
-                data-idx="${idx}" title="Redenumește">
+                data-idx="${idx}" title="Redenumește playlist">
           <span class="material-icons-round text-[14px]">edit</span>
         </button>
         <button class="remove-btn w-7 h-7 flex items-center justify-center rounded-lg
                        text-zinc-700 hover:text-red-400 hover:bg-red-900/20
                        transition-all duration-150"
-                data-idx="${idx}" title="Elimină">
+                data-idx="${idx}" title="Elimină playlist">
           <span class="material-icons-round text-[14px]">close</span>
         </button>
         <span class="material-icons-round chevron text-[18px] text-zinc-700 flex-shrink-0">expand_more</span>
@@ -618,34 +1033,62 @@
 
       <!-- Video list (collapsed) -->
       <div class="video-list" data-list="${idx}">
-        <div class="px-4 pb-3 pt-1 border-t border-white/5 space-y-0.5 max-h-[280px] overflow-y-auto">
-          ${pl.videos.map((v, vi) => `
-            <div class="video-row flex items-center gap-2.5 px-2 py-1.5 rounded-lg group">
-              <span class="text-[10px] font-mono text-zinc-700 w-5 text-right flex-shrink-0">${vi + 1}</span>
-              <p class="flex-1 text-[12px] text-zinc-400 truncate">${esc(v.title)}</p>
-              <span class="text-[10px] font-mono text-zinc-600 flex-shrink-0">${esc(v.duration)}</span>
-            </div>
-          `).join('')}
+        <div class="px-3 pb-3 pt-1 border-t border-white/5 space-y-0.5 max-h-[320px] overflow-y-auto">
+          ${videoRowsHtml}
+          ${pl.videos.length === 0
+            ? `<p class="text-[12px] text-zinc-700 text-center py-4 italic">
+                 Niciun clip — apasă + pentru a adăuga.
+               </p>`
+            : ''}
         </div>
       </div>
     `;
 
+    // Toggle expand/collapse
     card.querySelector('[data-toggle]').addEventListener('click', e => {
       if (e.target.closest('button')) return;
       card.querySelector('.video-list').classList.toggle('open');
       card.querySelector('.chevron').classList.toggle('open');
     });
+
+    // Elimină playlist
     card.querySelector('.remove-btn').addEventListener('click', e => {
       e.stopPropagation();
+      if (!confirm(`Ștergi playlist-ul "${pl.title}" (${pl.videos.length} clipuri)?`)) return;
       playlists.splice(parseInt(e.currentTarget.dataset.idx), 1);
       renderQueue();
       showToast('Playlist eliminat.', 'warn');
     });
+
+    // Redenumește playlist
     card.querySelector('.edit-title-btn').addEventListener('click', e => {
       e.stopPropagation();
-      const i   = parseInt(e.currentTarget.dataset.idx);
+      const i    = parseInt(e.currentTarget.dataset.idx);
       const newT = prompt('Redenumește playlist-ul:', playlists[i].title);
       if (newT && newT.trim()) { playlists[i].title = newT.trim(); renderQueue(); }
+    });
+
+    // Adaugă clip manual în acest playlist
+    card.querySelector('.add-video-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      openAddVideoModal(parseInt(e.currentTarget.dataset.idx));
+    });
+
+    // Ștergere clipuri individuale
+    card.querySelectorAll('.del-video-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const pi = parseInt(e.currentTarget.dataset.pl);
+        const vi = parseInt(e.currentTarget.dataset.vi);
+        const title = playlists[pi].videos[vi].title;
+        playlists[pi].videos.splice(vi, 1);
+        renderQueue();
+        // Re-deschide lista dacă era deschisă
+        const list = document.querySelector(`.video-list[data-list="${pi}"]`);
+        if (list) { list.classList.add('open');
+          list.previousElementSibling?.querySelector('.chevron')?.classList.add('open'); }
+        showToast(`„${title.substring(0,40)}" eliminat.`, 'warn');
+      });
     });
 
     return card;
@@ -662,14 +1105,14 @@
     const json = JSON.stringify(buildDataObject(), null, 2);
     const highlighted = json
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"(title|url|duration|playlists|videos)":/g,'<span style="color:#fb923c">"\$1"</span>:')
-      .replace(/: "([^"]*)"([,\n])/g,': <span style="color:#86efac">"\$1"</span>\$2')
-      .replace(/: "([^"]*)"$/gm,': <span style="color:#86efac">"\$1"</span>')
-      .replace(/(\[|\]|\{|\})/g,'<span style="color:#94a3b8">\$1</span>');
+      .replace(/"(title|url|duration|playlists|videos)":/g,'<span class="json-key">"\$1"</span>:')
+      .replace(/: "([^"]*)"([,\n])/g,': <span class="json-str">"\$1"</span>\$2')
+      .replace(/: "([^"]*)"$/gm,': <span class="json-str">"\$1"</span>')
+      .replace(/(\[|\]|\{|\})/g,'<span class="json-br">\$1</span>');
     jsonPreview.innerHTML = highlighted;
 
     const totalV = playlists.reduce((s,p) => s + p.videos.length, 0);
-    previewBadge.textContent = `${playlists.length}pl · ${totalV}v`;
+    previewBadge.textContent = `${playlists.length} playlist-uri · ${totalV} clipuri`;
     previewBadge.classList.remove('hidden');
   }
 
@@ -748,6 +1191,165 @@
     }
   }
 
+  /* ── EDITOR FEATURES ──────────────────────────── */
+
+  /**
+   * Deschide modal pentru adăugare clip manual.
+   * Pre-selectează playlist-ul dacă idx e specificat.
+   */
+  function openAddVideoModal(preselectedIdx = null) {
+    // Populează select cu playlist-urile existente
+    manualPlaylistSelect.innerHTML = playlists.map((pl, i) =>
+      `<option value="${i}" ${i === preselectedIdx ? 'selected' : ''}>${esc(pl.title)}</option>`
+    ).join('');
+
+    if (playlists.length === 0) {
+      showToast('Adaugă mai întâi un playlist.', 'warn');
+      return;
+    }
+
+    // Reset câmpuri
+    manualTitle.value    = '';
+    manualUrl.value      = '';
+    manualDuration.value = '';
+    addVideoModal.classList.add('open');
+    setTimeout(() => manualTitle.focus(), 100);
+  }
+
+  function closeAddVideoModal() {
+    addVideoModal.classList.remove('open');
+  }
+
+  function handleConfirmAddVideo() {
+    const title    = manualTitle.value.trim();
+    const url      = manualUrl.value.trim();
+    const duration = manualDuration.value.trim() || '0:00';
+    const pi       = parseInt(manualPlaylistSelect.value);
+
+    if (!title) { manualTitle.focus(); showToast('Introdu un titlu.', 'warn'); return; }
+    if (!url)   { manualUrl.focus();   showToast('Introdu un URL YouTube.', 'warn'); return; }
+
+    // Validare URL minim
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+      showToast('URL-ul nu pare a fi YouTube.', 'warn');
+      return;
+    }
+
+    playlists[pi].videos.push({ title, url, duration });
+    closeAddVideoModal();
+    renderQueue();
+
+    // Auto-expandă playlist-ul în care s-a adăugat
+    setTimeout(() => {
+      const list = document.querySelector(`.video-list[data-list="${pi}"]`);
+      if (list) {
+        list.classList.add('open');
+        list.previousElementSibling?.querySelector('.chevron')?.classList.add('open');
+        // Scroll la ultimul clip adăugat
+        list.querySelector('div')?.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 50);
+
+    showToast(`„${title.substring(0,40)}" adăugat în „${playlists[pi].title}".`);
+  }
+
+  /**
+   * Deschide modal pentru creare playlist manual (fără API).
+   */
+  function openManualPlaylistModal() {
+    manualPlaylistName.value = '';
+    addManualPlaylistModal.classList.add('open');
+    setTimeout(() => manualPlaylistName.focus(), 100);
+  }
+
+  function closeManualPlaylistModal() {
+    addManualPlaylistModal.classList.remove('open');
+  }
+
+  function handleConfirmManualPlaylist() {
+    const name = manualPlaylistName.value.trim();
+    if (!name) { manualPlaylistName.focus(); showToast('Introdu un nume.', 'warn'); return; }
+
+    playlists.push({ id: 'manual_' + Date.now(), title: name, videos: [] });
+    closeManualPlaylistModal();
+    renderQueue();
+    showToast(`Playlist „${name}" creat. Adaugă clipuri cu butonul +.`);
+
+    // Auto-expandă noul playlist
+    const newIdx = playlists.length - 1;
+    setTimeout(() => {
+      const list = document.querySelector(`.video-list[data-list="${newIdx}"]`);
+      if (list) {
+        list.classList.add('open');
+        list.previousElementSibling?.querySelector('.chevron')?.classList.add('open');
+      }
+    }, 50);
+  }
+
+  /**
+   * Încarcă un data.json existent în editor.
+   * Merge-uiește cu ce există sau înlocuiește complet.
+   */
+  function handleLoadJson(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      let data;
+      try {
+        data = JSON.parse(e.target.result);
+      } catch (err) {
+        showToast('Fișier JSON invalid: ' + err.message, 'error');
+        return;
+      }
+
+      if (!data.playlists || !Array.isArray(data.playlists)) {
+        showToast('Structură invalidă: lipsește "playlists".', 'error');
+        return;
+      }
+
+      const incoming = data.playlists.length;
+      const incomingVideos = data.playlists.reduce((s,p) => s + (p.videos?.length||0), 0);
+
+      if (playlists.length > 0) {
+        // Dacă există deja date, întreabă utilizatorul
+        const choice = confirm(
+          `Există deja ${playlists.length} playlist(uri) în editor.
+
+` +
+          `OK = Adaugă noile ${incoming} playlist(uri) la cele existente
+` +
+          `Anulează = Înlocuiește tot cu fișierul nou`
+        );
+        if (choice) {
+          // Merge — adaugă doar playlist-urile care nu există deja (după titlu)
+          const existingTitles = new Set(playlists.map(p => p.title.toLowerCase()));
+          let added = 0;
+          data.playlists.forEach(pl => {
+            if (!existingTitles.has(pl.title.toLowerCase())) {
+              playlists.push({ ...pl, id: pl.id || 'loaded_' + Date.now() + '_' + added });
+              added++;
+            }
+          });
+          showToast(`${added} playlist(uri) noi adăugate (${incoming - added} duplicate ignorate).`);
+        } else {
+          // Înlocuiește complet
+          playlists.length = 0;
+          data.playlists.forEach((pl, i) => playlists.push({ ...pl, id: pl.id || 'loaded_' + i }));
+          showToast(`${incoming} playlist(uri) încărcate (${incomingVideos} clipuri). Editorul a fost resetat.`);
+        }
+      } else {
+        // Editor gol — încarcă direct
+        data.playlists.forEach((pl, i) => playlists.push({ ...pl, id: pl.id || 'loaded_' + i }));
+        showToast(`${incoming} playlist(uri) încărcate (${incomingVideos} clipuri). Editează și descarcă!`);
+      }
+
+      filenameInput.value = file.name || 'data.json';
+      renderQueue();
+    };
+    reader.onerror = () => showToast('Eroare la citirea fișierului.', 'error');
+    reader.readAsText(file, 'UTF-8');
+  }
+
   /* ── EVENT LISTENERS ───────────────────────────── */
 
   addBtn.addEventListener('click', handleAddPlaylist);
@@ -767,6 +1369,84 @@
     const text = e.dataTransfer.getData('text/plain');
     if (text) { urlInput.value = text; urlInput.focus(); }
   });
+
+  // ── Load JSON existent ────────────────────────────
+  loadJsonBtn.addEventListener('click', () => {
+    loadJsonFileInput.value = '';
+    loadJsonFileInput.click();
+  });
+  loadJsonFileInput.addEventListener('change', function() {
+    const file = this.files && this.files[0];
+    if (file) handleLoadJson(file);
+  });
+
+  // ── Modal: adaugă clip manual ─────────────────────
+  closeModalBtn.addEventListener('click', closeAddVideoModal);
+  cancelModalBtn.addEventListener('click', closeAddVideoModal);
+  confirmAddVideoBtn.addEventListener('click', handleConfirmAddVideo);
+  addVideoModal.addEventListener('click', e => {
+    if (e.target === addVideoModal) closeAddVideoModal();
+  });
+  // Enter în câmpurile modalului
+  [manualTitle, manualUrl, manualDuration].forEach(inp => {
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') handleConfirmAddVideo(); });
+  });
+
+  // ── Modal: playlist manual ────────────────────────
+  addManualPlaylistBtn.addEventListener('click', openManualPlaylistModal);
+  closeManualPlaylistModalBtn.addEventListener('click', closeManualPlaylistModal);
+  cancelManualPlaylistModalBtn.addEventListener('click', closeManualPlaylistModal);
+  confirmAddManualPlaylistBtn.addEventListener('click', handleConfirmManualPlaylist);
+  addManualPlaylistModal.addEventListener('click', e => {
+    if (e.target === addManualPlaylistModal) closeManualPlaylistModal();
+  });
+  manualPlaylistName.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleConfirmManualPlaylist();
+  });
+
+  // ── Escape închide orice modal deschis ────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeAddVideoModal();
+      closeManualPlaylistModal();
+    }
+  });
+
+  // ── Drag & Drop JSON pe panoul stâng ─────────────
+  const leftPanel = document.querySelector('.w-\\[480px\\]');
+  if (leftPanel) {
+    leftPanel.addEventListener('dragover', e => e.preventDefault());
+    leftPanel.addEventListener('drop', e => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files[0];
+      if (file && (file.name.endsWith('.json') || file.type === 'application/json')) {
+        handleLoadJson(file);
+      }
+    });
+  }
+
+  // ── Theme toggle ────────────────────────────────
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const themeIcon      = document.getElementById('themeIcon');
+
+  function applyBuilderTheme(isDark) {
+    document.documentElement.classList.toggle('dark', isDark);
+    themeIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
+    localStorage.setItem('builder-theme', isDark ? 'dark' : 'light');
+  }
+
+  function initBuilderTheme() {
+    const saved = localStorage.getItem('builder-theme');
+    const isDark = saved === 'dark' ||
+                   (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyBuilderTheme(isDark);
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    applyBuilderTheme(!document.documentElement.classList.contains('dark'));
+  });
+
+  initBuilderTheme();
 
   renderQueue();
   </script>
